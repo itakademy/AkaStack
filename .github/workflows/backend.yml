@@ -1,0 +1,51 @@
+name: Backend (Laravel)
+
+on:
+  pull_request:
+  push:
+    paths:
+      - 'back/**'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  laravel:
+    runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, redis, pdo_sqlite
+          coverage: none
+
+      - name: Install dependencies
+        working-directory: back
+        run: |
+          composer install --no-interaction --prefer-dist
+
+      - name: Prepare environment
+        working-directory: back
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+
+      - name: Static analysis (PHPStan)
+        working-directory: back
+        run: vendor/bin/phpstan analyse
+
+      - name: Tests (Pest / PHPUnit)
+        working-directory: back
+        run: php artisan test

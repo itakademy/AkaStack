@@ -1,0 +1,13 @@
+name: CI (Full Stack)
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  backend:
+#    uses: ./.github/workflows/backend.yml
+
+  frontend:
+#    uses: ./.github/workflows/frontend.yml
