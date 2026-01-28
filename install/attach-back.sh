@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --------------------------------------------
-# Attach an existing backend as OrizonStack submodule
+# Attach an existing backend as AkaStack submodule
 # Script location: install/
 # --------------------------------------------
 
@@ -16,7 +16,7 @@ fi
 BACK_REPO="$1"
 
 # --------------------------------------------
-# Move to OrizonStack root
+# Move to AkaStack root
 # --------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STACK_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -36,7 +36,7 @@ echo
 # Safety checks
 # --------------------------------------------
 if [ ! -d ".git" ]; then
-  echo "❌ Not in OrizonStack root (no .git found)."
+  echo "❌ Not in AkaStack root (no .git found)."
   exit 1
 fi
 
@@ -66,7 +66,7 @@ fi
 # --------------------------------------------
 # Commit
 # --------------------------------------------
-echo "▶ Recording OrizonStack state"
+echo "▶ Recording AkaStack state"
 git add .gitmodules "$TARGET_DIR"
 git commit -m "Attach backend submodule ($BACK_REPO)"
 

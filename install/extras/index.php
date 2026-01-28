@@ -97,7 +97,7 @@ if (count($parts) >= 2) {
     </main>
 
     <footer class="footer">
-        <p>Online documentation : <a href="https://github.com/Black0wI/OrizonStack/wiki" target="_blank">OrizonStack Wiki on Github</a>
+        <p>Online documentation : <a href="https://github.com/itakademy/AkaStack/wiki" target="_blank">AkaStack Wiki on Github</a>
             Endpoints :
             <a href="https://www.<?= $rootDomain ?>" target="_blank">Front-end</a> |
             <a href="https://back.<?= $rootDomain ?>" target="_blank">Back-end</a> |

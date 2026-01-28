@@ -245,7 +245,7 @@ if [ ! -f "$KEY" ]; then
   sudo -u vagrant mkdir -p "$SSH_DIR"
   sudo -u vagrant chmod 700 "$SSH_DIR"
 
-  sudo -u vagrant ssh-keygen -t ed25519 -C "vagrant@orizonstack" -f "$KEY" -N ""
+  sudo -u vagrant ssh-keygen -t ed25519 -C "vagrant@akastack" -f "$KEY" -N ""
 
   sudo chown -R vagrant:vagrant "$SSH_DIR"
 
