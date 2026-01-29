@@ -7,9 +7,9 @@ ok()   { echo -e "\033[1;32m[ OK ]\033[0m $*"; }
 warn() { echo -e "\033[1;33m[WARN]\033[0m $*"; }
 err()  { echo -e "\033[1;31m[ERR ]\033[0m $*" >&2; }
 
-STACK="/var/www/project"
-BACK="$STACK/back"
-FRONT="$STACK/front"
+STACK="/var/www/stack"
+BACK="/var/www/back"
+FRONT="/var/www/front"
 
 [ -f "$STACK/project.env" ] || { err "Missing project.env"; exit 1; }
 source "$STACK/project.env"
@@ -21,10 +21,17 @@ read -rp "Type RESET to continue: " c
 [ "$c" = "RESET" ] || exit 1
 
 # ----------------------------
-# Save current state
+# Save current state (front/back if they are Git repos)
 # ----------------------------
-cd "$STACK"
-git submodule status > "$ROLLBACK_FILE"
+rm -f "$ROLLBACK_FILE"
+if [ -d "$BACK/.git" ]; then
+  back_sha=$(cd "$BACK" && git rev-parse HEAD)
+  echo "back $back_sha" >> "$ROLLBACK_FILE"
+fi
+if [ -d "$FRONT/.git" ]; then
+  front_sha=$(cd "$FRONT" && git rev-parse HEAD)
+  echo "front $front_sha" >> "$ROLLBACK_FILE"
+fi
 ok "Saved current Git state"
 
 # ----------------------------
@@ -33,11 +40,16 @@ ok "Saved current Git state"
 read -rp "Rollback to last saved state? (yes/no): " r
 
 if [ "$r" = "yes" ] && [ -f "$ROLLBACK_FILE" ]; then
-  info "Rolling back submodules"
-  while read -r line; do
-    sha=$(echo "$line" | awk '{print $1}')
-    path=$(echo "$line" | awk '{print $2}')
-    (cd "$STACK/$path" && git fetch && git checkout "$sha")
+  info "Rolling back Git repos"
+  while read -r role sha; do
+    case "$role" in
+      back) repo="$BACK" ;;
+      front) repo="$FRONT" ;;
+      *) continue ;;
+    esac
+    if [ -d "$repo/.git" ]; then
+      (cd "$repo" && git fetch && git checkout "$sha")
+    fi
   done < "$ROLLBACK_FILE"
 fi
 

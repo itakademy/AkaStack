@@ -5,7 +5,7 @@ use FastVolt\Helper\Markdown;
 // ----------------------------------
 // Configuration
 // ----------------------------------
-$readmePath = '/var/www/project/README.md';
+$readmePath = '/var/www/stack/README.md';
 
 if (!file_exists($readmePath)) {
     http_response_code(404);
@@ -87,7 +87,7 @@ if (count($parts) >= 2) {
 <div class="page">
 
     <header>
-        <p><img src="/od-logo.png" width="291" /> </p>
+        <p><img src="/itakademy-logo.png" width="291" /> </p>
     </header>
 
     <main class="content">

@@ -13,8 +13,8 @@ err()   { printf "\033[1;31m[ERR ]\033[0m %s\n"  "$*" >&2; }
 # ----------------------------
 # Paths
 # ----------------------------
-STACK_ROOT="/var/www/project"
-PROJECT_DIR="$STACK_ROOT/back"
+STACK_ROOT="/var/www/stack"
+PROJECT_DIR="/var/www/back"
 PROJECT_ENV_FILE="$STACK_ROOT/project.env"
 ENV_FILE="$PROJECT_DIR/.env"
 
@@ -32,19 +32,13 @@ else
 fi
 
 # ----------------------------
-# Git helpers
-# ----------------------------
-is_submodule() {
-  git submodule status -- "$1" &>/dev/null
-}
-
-cd "$STACK_ROOT"
-
-# ----------------------------
 # Backend presence
 # ----------------------------
-if [ -d "$PROJECT_DIR/.git" ] && is_submodule "$PROJECT_DIR"; then
-  ok "Backend is a Git submodule"
+if [ -d "$PROJECT_DIR/.git" ]; then
+  ok "Backend is a Git repo"
+  cd "$PROJECT_DIR"
+elif [ -f "$PROJECT_DIR/composer.json" ]; then
+  ok "Backend directory exists"
   cd "$PROJECT_DIR"
 elif [ ! -d "$PROJECT_DIR" ]; then
   warn "No backend found — creating new Laravel backend"
@@ -52,7 +46,7 @@ elif [ ! -d "$PROJECT_DIR" ]; then
   cd "$PROJECT_DIR"
   composer create-project laravel/laravel .
 else
-  err "Directory back/ exists but is NOT a submodule — refusing to continue"
+  err "Directory back/ exists but does not look like a Laravel backend"
   exit 1
 fi
 

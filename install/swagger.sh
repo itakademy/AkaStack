@@ -7,7 +7,7 @@ echo " Installing Swagger UI"
 echo "======================================"
 
 # -------- Config / Inputs --------
-PROJECT_SRC_DIR="/var/www/project"
+PROJECT_SRC_DIR="/var/www/stack"
 ENV_FILE="$PROJECT_SRC_DIR/project.env"
 
 # -------- Helpers --------
@@ -28,8 +28,8 @@ else
   exit 1
 fi
 
-SWAGGER_DIR="/var/www/project/swagger"
-MARKER_FILE="/var/www/project/.swagger.installed"
+SWAGGER_DIR="/var/www/stack/swagger"
+MARKER_FILE="/var/www/stack/.swagger.installed"
 APACHE_CONF="/etc/apache2/conf-available/swagger.conf"
 
 

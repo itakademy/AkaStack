@@ -1,7 +1,7 @@
 #!/bin/bash
 # Provisioning script – Ubuntu 24.04 LTS
 
-PROJECT_VERSION=$(cat /var/www/project/VERSION)
+PROJECT_VERSION=$(cat /var/www/stack/VERSION)
 
 export DEBIAN_FRONTEND=noninteractive
 echo ""
@@ -57,8 +57,8 @@ echo "ServerName ${PROJECT_DOMAIN}" > /etc/apache2/conf-available/servername.con
 sudo a2enconf servername
 
 sudo mkdir -p /etc/apache2/ssl
-sudo cp /var/www/project/certs/orizon.dev.key /etc/apache2/ssl/orizon.dev.key
-sudo cp /var/www/project/certs/orizon.dev.pem /etc/apache2/ssl/orizon.dev.pem
+sudo cp /var/www/stack/certs/orizon.dev.key /etc/apache2/ssl/orizon.dev.key
+sudo cp /var/www/stack/certs/orizon.dev.pem /etc/apache2/ssl/orizon.dev.pem
 sudo chmod 600 /etc/apache2/ssl/orizon.dev.key
 sudo chmod 644 /etc/apache2/ssl/orizon.dev.pem
 
@@ -89,8 +89,8 @@ sudo tee /etc/apache2/sites-available/999-default-ssl.conf > /dev/null <<EOF
     SSLCertificateFile /etc/apache2/ssl/orizon.dev.pem
     SSLCertificateKeyFile /etc/apache2/ssl/orizon.dev.key
 
-    ErrorLog /var/www/project/logs/default_ssl_error.log
-    CustomLog /var/www/project/logs/default_ssl_access.log combined
+    ErrorLog /var/www/stack/logs/default_ssl_error.log
+    CustomLog /var/www/stack/logs/default_ssl_access.log combined
 </VirtualHost>
 EOF
 
@@ -100,9 +100,9 @@ a2ensite 999-default-ssl
 sudo rm -rf /etc/apache2/sites-available/000-default.conf
 sudo rm -rf /etc/apache2/sites-available/default-ssl.conf
 
-sudo mkdir -p /var/www/project/logs &> /dev/null 2>&1
+sudo mkdir -p /var/www/stack/logs &> /dev/null 2>&1
 sudo rm -rf /var/www/html
-sudo ln -s /var/www/project/install/extras /var/www/html
+sudo ln -s /var/www/stack/install/extras /var/www/html
 
 echo "🔁 Restarting Apache service..."
 sudo a2enmod ssl proxy proxy_fcgi proxy_http
@@ -222,7 +222,7 @@ sudo chmod a+w composer.json
 composer require fastvolt/markdown --no-interaction &> /dev/null 2>&1
 
 echo "🔧 Configuring development environment (access rights, inotify, cron jobs)..."
-sudo chgrp -R www-data /var/www/project&> /dev/null 2>&1
+sudo chgrp -R www-data /var/www/stack&> /dev/null 2>&1
 echo "fs.inotify.max_user_watches=524288" | sudo tee -a /etc/sysctl.conf &> /dev/null 2>&1
 sudo sysctl -p &> /dev/null 2>&1
 composer global require deployer/deployer &> /dev/null 2>&1
@@ -231,7 +231,7 @@ source /home/vagrant/.bashrc
 echo -e "✅ Development environment configured successfully.\n"
 
 #removing previous install markers (if any)
-rm -f /var/www/project/*.installed
+rm -f /var/www/stack/*.installed
 
 echo "▶ Ensuring SSH key for user vagrant"
 

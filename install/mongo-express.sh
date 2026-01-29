@@ -5,7 +5,7 @@ echo "======================================"
 echo " Installing Mongo Express"
 echo "======================================"
 
-MARKER_FILE="/var/www/project/.mongo-express.installed"
+MARKER_FILE="/var/www/stack/.mongo-express.installed"
 SERVICE_FILE="/etc/systemd/system/mongo-express.service"
 APP_DIR="/opt/mongo-express"
 
@@ -29,7 +29,7 @@ fi
 
 # shellcheck disable=SC1090
 set -a
-source /var/www/project/project.env
+source /var/www/stack/project.env
 set +a
 
 # --------------------------------------

@@ -27,7 +27,7 @@ fi
 
 # shellcheck disable=SC1090
 set -a
-source /var/www/project/project.env
+source /var/www/stack/project.env
 set +a
 
 # --------------------------------------
@@ -111,7 +111,7 @@ sudo systemctl reload apache2
 # --------------------------------------
 # Marker file (feature flag)
 # --------------------------------------
-touch /var/www/project/.redis-commander.installed
+touch /var/www/stack/.redis-commander.installed
 
 # --------------------------------------
 # Info

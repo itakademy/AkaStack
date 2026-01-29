@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # qa_tools.sh — Install & wire QA tools inside a Laravel project (Vagrant box).
-# Assumes PHP, Composer, Apache already installed and project at /var/www/project/src
+# Assumes PHP, Composer, Apache already installed and project at /var/www/back
 #
 set -euo pipefail
 IFS=$'\n\t'
@@ -9,7 +9,7 @@ IFS=$'\n\t'
 # ----------------------------
 # Config
 # ----------------------------
-PROJECT_SRC_DIR="/var/www/project/back/"
+PROJECT_SRC_DIR="/var/www/back/"
 ENV_FILE="$PROJECT_SRC_DIR/.env"
 
 # Composer flags (faster, non-interactive)

@@ -13,8 +13,8 @@ err()   { printf "\033[1;31m[ERR ]\033[0m %s\n"  "$*" >&2; }
 # ----------------------------
 # Paths
 # ----------------------------
-STACK_ROOT="/var/www/project"
-PROJECT_DIR="$STACK_ROOT/front"
+STACK_ROOT="/var/www/stack"
+PROJECT_DIR="/var/www/front"
 PROJECT_ENV_FILE="$STACK_ROOT/project.env"
 
 # ----------------------------
@@ -31,19 +31,13 @@ else
 fi
 
 # ----------------------------
-# Git helpers
-# ----------------------------
-is_submodule() {
-  git submodule status -- "$1" &>/dev/null
-}
-
-cd "$STACK_ROOT"
-
-# ----------------------------
 # Frontend presence
 # ----------------------------
-if [ -d "$PROJECT_DIR/.git" ] && is_submodule "$PROJECT_DIR"; then
-  ok "Frontend is a Git submodule"
+if [ -d "$PROJECT_DIR/.git" ]; then
+  ok "Frontend is a Git repo"
+  cd "$PROJECT_DIR"
+elif [ -f "$PROJECT_DIR/package.json" ]; then
+  ok "Frontend directory exists"
   cd "$PROJECT_DIR"
 elif [ ! -d "$PROJECT_DIR" ]; then
   warn "No frontend found — creating new Next.js frontend"
@@ -51,7 +45,7 @@ elif [ ! -d "$PROJECT_DIR" ]; then
   cd "$PROJECT_DIR"
   npx create-next-app@latest . --ts --tailwind --eslint --src-dir --app --no-git
 else
-  err "Directory front/ exists but is NOT a submodule — refusing to continue"
+  err "Directory front/ exists but does not look like a Node frontend"
   exit 1
 fi
 

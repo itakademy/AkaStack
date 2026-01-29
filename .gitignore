@@ -14,8 +14,6 @@
 /.supervisor.installed
 
 /swagger/
-/front/
-/back/
 
 /install/extras/vendor/
 /install/extras/composer.json

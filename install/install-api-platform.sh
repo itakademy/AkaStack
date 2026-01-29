@@ -17,7 +17,7 @@ warn()  { printf "\033[1;33m[WARN]\033[0m %s\n" "$*"; }
 err()   { printf "\033[1;31m[ERR ]\033[0m %s\n"  "$*" >&2; }
 
 # Variables
-PROJECT_DIR="/var/www/project/back"
+PROJECT_DIR="/var/www/back"
 echo "Installing API Platform..."
 
 # Ensure the target directory exists and Laravel is already installed

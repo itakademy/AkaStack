@@ -12,7 +12,7 @@ echo " Installing MailHog (Go official build)"
 echo "======================================"
 
 # -------- Config --------
-PROJECT_SRC_DIR="/var/www/project"
+PROJECT_SRC_DIR="/var/www/stack"
 ENV_FILE="$PROJECT_SRC_DIR/project.env"
 
 MAILHOG_BIN="/usr/local/bin/mailhog"

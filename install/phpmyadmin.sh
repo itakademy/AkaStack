@@ -6,7 +6,7 @@
 #
 
 # -------- Config / Inputs --------
-PROJECT_SRC_DIR="/var/www/project"
+PROJECT_SRC_DIR="/var/www/stack"
 ENV_FILE="$PROJECT_SRC_DIR/project.env"
 
 # -------- Helpers --------
@@ -68,7 +68,7 @@ echo "🧪 Installing phpMyAdmin (non-interactive)…"
 echo "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2" | sudo debconf-set-selections
 sudo DEBIAN_FRONTEND=noninteractive apt-get -yq install phpmyadmin >/dev/null 2>&1
 # Mark phpMyAdmin as installed
-touch /var/www/project/.phpmyadmin.installed
+touch /var/www/stack/.phpmyadmin.installed
 
 # -------- Final output --------
 cat <<MSG

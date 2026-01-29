@@ -57,7 +57,7 @@ Vagrant.configure("2") do |config|
   # Synced folders
   # ================================
   config.vm.synced_folder "./", "/vagrant", disabled: true
-  config.vm.synced_folder "./", "/var/www/project", owner: "vagrant", group: "www-data"
+  config.vm.synced_folder "./", "/var/www/stack", owner: "vagrant", group: "www-data"
 
   # ================================
   # Provisioning
@@ -89,5 +89,4 @@ Vagrant.configure("2") do |config|
   puts "▶ VM #{VM_NAME} - #{ENV.fetch("VM_BASE_VERSION")}"
   puts "▶ IP=#{ENV.fetch("VM_IP")} | CPU=#{ENV.fetch("VM_CPUS")} | RAM=#{ENV.fetch("VM_MEMORY")}MB"
 end
-
 
