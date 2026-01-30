@@ -12,107 +12,115 @@ ok()   { echo -e "${GREEN}[ OK ]${NC} $*"; }
 warn() { echo -e "${ORANGE}[WARN]${NC} $*"; }
 err()  { echo -e "${RED}[ERR ]${NC} $*" >&2; }
 
-info "🐧 Initializing Linux host (Project Architecture) ..."
+info "🐧 Initialisation de l'hôte Linux (Architecture AkaStack) ..."
 
-# 1. Update system and install dependencies
-info "📦 Updating package list and installing dependencies..."
-sudo apt-get update
-sudo apt-get install -y curl wget git libnss3-tools
-
-# 2. Install / Update Vagrant
-if ! command -v vagrant &> /dev/null; then
-    info "📦 Installing Vagrant via HashiCorp repository..."
-    wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-    sudo apt-get update && sudo apt-get install -y vagrant
-else
-    ok "✅ Vagrant already installed."
-fi
-
-# 3. Install hostmanager plugin
-info "🔌 Configuring Vagrant plugins..."
-if ! vagrant plugin list | grep -q "vagrant-hostmanager"; then
-    vagrant plugin install vagrant-hostmanager
-    ok "✅ vagrant-hostmanager plugin installed."
-else
-    ok "✅ vagrant-hostmanager plugin already present."
-fi
-
-# 4. Prompt for email for SSH
-while true; do
-    read -p "📧 Enter your GitHub email address: " EMAIL
-    if [[ "$EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]]; then
-        break
-    else
-        err "⚠️ Invalid email format."
-    fi
-done
-
-# 5. SSH key management
+# 1. Gestion des clés SSH
 SSH_KEY="$HOME/.ssh/id_ed25519"
 if [ ! -f "$SSH_KEY" ]; then
-    info "🔑 Generating Ed25519 key..."
+    info "🔑 Aucune clé SSH trouvée. Création d'une clé pour GitHub..."
+    while true; do
+        read -p "📧 Entrez votre email GitHub : " EMAIL
+        if [[ "$EMAIL" =~ ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$ ]]; then
+            break
+        else
+            err "⚠️ Format d'email invalide."
+        fi
+    done
+
     ssh-keygen -t ed25519 -C "$EMAIL" -f "$SSH_KEY" -N ""
 
     info "------------------------------------------------------"
-    echo "📋 ADD this key on GitHub (https://github.com/settings/keys):"
+    echo -e "${ORANGE}ACTION REQUISE :${NC}"
+    echo "1. Copiez la clé publique ci-dessous :"
     echo -e "${GREEN}$(cat ${SSH_KEY}.pub)${NC}"
-    echo -e "${BLUE}------------------------------------------------------${NC}"
+    echo "2. Ajoutez-la ici : https://github.com/settings/keys"
+    echo "------------------------------------------------------"
+
+    read -p "Appuyez sur [Entrée] une fois la clé ajoutée à GitHub..." CONFIRM
 else
-    ok "✅ Existing SSH key."
+    ok "✅ Clé SSH existante trouvée."
 fi
 
-# 6. Configure SSH agent
-# On Linux, we use ssh-add. To persist, one would usually add it to .bashrc or .zshrc
+# 2. Configuration de l'agent SSH (session actuelle)
 eval "$(ssh-agent -s)"
 ssh-add "$SSH_KEY"
 
+# 3. Clonage du dépôt Infra
+INFRA_REPO="git@github.com:itakademy/AkaStack-infra.git"
+INFRA_DIR="./infra"
+
+if [ ! -d "$INFRA_DIR" ]; then
+    info "📂 Clonage du dépôt infra..."
+    git clone "$INFRA_REPO" "$INFRA_DIR"
+
+    if [ -d "./.git" ]; then
+        warn "⚠️ Nettoyage du .git racine pour isoler les briques..."
+        rm -rf ./.git
+    fi
+else
+    ok "✅ Répertoire infra déjà présent."
+fi
+
+# 4. Configuration Interactive & Création du .env
+echo -e "\n${BLUE}⚙️  Configuration de l'environnement (Génération du .env)${NC}"
 PROJECT_ENV_FILE="./.env"
 
-# 7. SSL configuration (mkcert)
-info "🔐 SSL configuration (mkcert)..."
+while true; do
+    read -p "🔗 Domaine racine .local (ex: akastack.local) : " VAL_DOMAIN
+    if [[ "$VAL_DOMAIN" =~ ^[a-zA-Z0-9.-]+\.local$ ]]; then break; else err "⚠️ Doit finir par .local"; fi
+done
+
+while true; do
+    read -p "🌐 Adresse IP statique (ex: 192.168.56.10) : " VAL_IP
+    if [[ "$VAL_IP" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then break; else err "⚠️ Format IP invalide"; fi
+done
+
+read -p "💻 Nombre de CPUs (conseil: 2) [2] : " VAL_CPUS
+VAL_CPUS=${VAL_CPUS:-2}
+
+read -p "🧠 Mémoire RAM en Mo (conseil: 4096) [4096] : " VAL_RAM
+VAL_RAM=${VAL_RAM:-4096}
+
+cat <<EOF > "$PROJECT_ENV_FILE"
+# Généré par host-setup-linux.sh
+VM_DOMAIN=$VAL_DOMAIN
+VM_IP=$VAL_IP
+VM_CPUS=$VAL_CPUS
+VM_MEMORY=$VAL_RAM
+EOF
+
+ok "✅ Fichier $PROJECT_ENV_FILE généré."
+
+# 5. Installation des outils (Vagrant & mkcert)
+sudo apt-get update && sudo apt-get install -y wget curl git libnss3-tools
+
+if ! command -v vagrant &> /dev/null; then
+    info "📦 Installation de Vagrant (Dépôt HashiCorp)..."
+    wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+    sudo apt-get update && sudo apt-get install -y vagrant
+fi
+
+if ! vagrant plugin list | grep -q "vagrant-hostmanager"; then
+    info "🔌 Installation du plugin hostmanager..."
+    vagrant plugin install vagrant-hostmanager
+fi
 
 if ! command -v mkcert &> /dev/null; then
-    info "📦 mkcert not found. Installing..."
-    # Download binary directly as it's often more recent than apt
-    MKCERT_VERSION="v1.4.4"
-    sudo wget https://github.com/FiloSottile/mkcert/releases/download/${MKCERT_VERSION}/mkcert-${MKCERT_VERSION}-linux-amd64 -O /usr/local/bin/mkcert
-    sudo chmod +x /usr/local/bin/mkcert
-else
-    ok "✅ mkcert already installed."
+    info "📦 Installation de mkcert..."
+    VERSION="v1.4.4"
+    wget https://github.com/FiloSottile/mkcert/releases/download/${VERSION}/mkcert-${VERSION}-linux-amd64 -O mkcert
+    chmod +x mkcert
+    sudo mv mkcert /usr/local/bin/
 fi
-
 mkcert -install
 
-# --------------------------------------
-# Load project.env
-# --------------------------------------
-if [ ! -f "$PROJECT_ENV_FILE" ]; then
-  warn "❌ .env not found, using .env.example"
-  cp .env.example .env
-  info "📋 .env file created. Edit it and rerun the script."
-  exit 1
-fi
+# 6. Génération des Certificats SSL
+mkdir -p "$INFRA_DIR/certs"
+rm -f "$INFRA_DIR/certs/"*
+info "🔐 Génération des certificats pour *.${VAL_DOMAIN}..."
 
-set -a
-source "$PROJECT_ENV_FILE"
-set +a
+(cd "$INFRA_DIR/certs" && mkcert -cert-file wildcard.local.pem -key-file wildcard.local-key.pem "${VM_DOMAIN}" "*.${VAL_DOMAIN}" localhost 127.0.0.1 "$VM_IP")
 
-if [ -z "${VM_DOMAIN:-}" ]; then
-  err "❌ VM_DOMAIN is not defined in .env"
-  exit 1
-fi
-
-# 8. Generate certificates
-mkdir -p ./infra/certs
-info "Clear previous certs (if any)"
-rm -f ./infra/certs/*
-
-cd ./infra/certs
-mkcert -cert-file wildcard.local.pem -key-file wildcard.local-key.pem "*.${VM_DOMAIN}" localhost 127.0.0.1
-chmod 644 *.pem *.key
-
-ok "✔ Wildcard certificates generated for *.${VM_DOMAIN}"
-
-ok  "🎉 ALL DONE!"
-info "👉 Next step: 'cd infra && vagrant up'"
+ok "🎉 Configuration Linux terminée !"
+info "👉 Étape suivante : 'cd infra && vagrant up'"
