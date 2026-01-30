@@ -121,7 +121,7 @@ mkdir -p "$INFRA_DIR/certs"
 rm -f "$INFRA_DIR/certs/"*
 info "🔐 Génération des certificats pour *.${VAL_DOMAIN}..."
 
-(cd "$INFRA_DIR/certs" && mkcert -cert-file wildcard.local.pem -key-file wildcard.local-key.pem "${VM_DOMAIN}" "*.${VAL_DOMAIN}" localhost 127.0.0.1 "$VM_IP")
+(cd "$INFRA_DIR/certs" && mkcert -cert-file wildcard.local.pem -key-file wildcard.local-key.pem "${VAL_DOMAIN}" "*.${VAL_DOMAIN}" localhost 127.0.0.1 "$VAL_IP")
 
 chmod 644 "$INFRA_DIR/certs/"*.pem
 
