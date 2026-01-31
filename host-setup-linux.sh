@@ -81,12 +81,16 @@ VAL_CPUS=${VAL_CPUS:-2}
 read -p "🧠 Mémoire RAM en Mo (conseil: 4096) [4096] : " VAL_RAM
 VAL_RAM=${VAL_RAM:-4096}
 
+read -s -p "🔐 Mot de passe root MySQL : " VAL_MYSQL_ROOT
+echo
+
 cat <<EOF > "$PROJECT_ENV_FILE"
 # Généré par host-setup-linux.sh
 VM_DOMAIN=$VAL_DOMAIN
 VM_IP=$VAL_IP
 VM_CPUS=$VAL_CPUS
 VM_MEMORY=$VAL_RAM
+MYSQL_ROOT_PASSWORD=$VAL_MYSQL_ROOT
 EOF
 
 ok "✅ Fichier $PROJECT_ENV_FILE généré."
